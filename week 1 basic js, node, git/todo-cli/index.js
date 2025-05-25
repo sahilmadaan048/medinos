@@ -22,7 +22,8 @@ function showMenu() {
   console.log('1. View Tasks');
   console.log('2. Add Task');
   console.log('3. Delete Task');
-  console.log('4. Exit');
+  console.log('4. Mark Task as Done');
+  console.log('5. Exit');
 }
 
 // Main function
@@ -53,10 +54,15 @@ function main() {
         console.log('Invalid task number.');
       }
     } else if (choice === '4') {
-      console.log('Goodbye!');
-      break;
-    } else {
-      console.log('Invalid choice. Try again.');
+        const index = readline.questionInt('Enter task number to mark done: ');
+        if (index > 0 && index <= tasks.length) {
+            tasks[index - 1] += ' ✔️';
+            saveTasks(tasks);
+            console.log('Task marked as done.');
+        }
+    } else if(choice === '5') {
+        console.log("Goodbye");
+        break;
     }
   }
 }
