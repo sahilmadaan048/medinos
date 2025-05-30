@@ -1,0 +1,169 @@
+Great question! Understanding **`Interfaces` vs `Type Aliases`** is crucial in TypeScript. They are very similar, but they have some **key differences** and **use cases**.
+
+---
+
+## ✅ Common Ground: What They Can Both Do
+
+Both **`interface`** and **`type`** can be used to define:
+
+* Object shapes
+* Function signatures
+* Read-only or optional properties
+* Extending other types or interfaces
+
+---
+
+## 🔸 1. **Defining Object Shapes**
+
+### Using `interface`:
+
+```typescript
+interface User {
+  name: string;
+  age: number;
+}
+```
+
+### Using `type`:
+
+```typescript
+type User = {
+  name: string;
+  age: number;
+};
+```
+
+✅ Both are valid and interchangeable **in simple cases**.
+
+---
+
+## 🔸 2. **Extending and Merging**
+
+### ✅ `interface` supports **declaration merging** (can be reopened and extended):
+
+```typescript
+interface Person {
+  name: string;
+}
+
+interface Person {
+  age: number;
+}
+
+// Result:
+const p: Person = { name: "Sahil", age: 20 };  // OK
+```
+
+### ❌ `type` does **not support declaration merging**:
+
+```typescript
+type Person = { name: string };
+// type Person = { age: number }; // ❌ Error: Duplicate identifier 'Person'
+```
+
+---
+
+## 🔸 3. **Extending / Inheritance**
+
+### `interface`:
+
+```typescript
+interface Animal {
+  species: string;
+}
+
+interface Dog extends Animal {
+  bark(): void;
+}
+```
+
+### `type`:
+
+```typescript
+type Animal = {
+  species: string;
+};
+
+type Dog = Animal & {
+  bark(): void;
+};
+```
+
+✅ Both work, but interface `extends` is more semantic for object inheritance.
+
+---
+
+## 🔸 4. **Function Types**
+
+### With `type`:
+
+```typescript
+type Greet = (name: string) => string;
+```
+
+### With `interface`:
+
+```typescript
+interface Greet {
+  (name: string): string;
+}
+```
+
+✅ Both are valid. But `type` is preferred for function types for readability.
+
+---
+
+## 🔸 5. **Unions and Tuples**
+
+✅ Only **`type`** can do unions, tuples, mapped types, and primitives:
+
+```typescript
+type ID = string | number;      // union
+type Point = [number, number];  // tuple
+```
+
+❌ `interface` cannot do this.
+
+---
+
+## ✅ When to Use What?
+
+| Use Case                                  | Recommendation |
+| ----------------------------------------- | -------------- |
+| Object-oriented code or libraries         | `interface`    |
+| Public API design (allow merging)         | `interface`    |
+| Complex types (unions, tuples, functions) | `type`         |
+| Primitive or union aliases                | `type`         |
+| Reopening/extending interfaces later      | `interface`    |
+
+---
+
+## ✅ Final Verdict (Simple Rule)
+
+> 🔹 Use **`interface`** for objects/classes.
+> 🔸 Use **`type`** for everything else.
+
+---
+
+## 🧪 Quick Practice Example
+
+```typescript
+interface Vehicle {
+  wheels: number;
+  drive(): void;
+}
+
+type Car = Vehicle & { brand: string };
+
+const myCar: Car = {
+  wheels: 4,
+  brand: "Toyota",
+  drive() {
+    console.log("Driving...");
+  }
+};
+```
+
+---
+
+Would you like a set of **mini challenges** to practice choosing between interface and type?
