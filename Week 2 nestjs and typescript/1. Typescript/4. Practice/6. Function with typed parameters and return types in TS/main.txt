@@ -1,0 +1,142 @@
+Great! Let's learn how to write **functions with typed parameters and return types** in TypeScript. This is a core feature of TypeScript and ensures **type safety** and **better autocomplete**.
+
+---
+
+## 🔹 1. Basic Function Typing
+
+### ✅ Syntax:
+
+```ts
+function functionName(param1: Type1, param2: Type2): ReturnType {
+  // function body
+}
+```
+
+---
+
+### 📌 Example 1: Simple Add Function
+
+```ts
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+console.log(add(2, 3)); // 5
+```
+
+✅ TypeScript checks that:
+
+* `a` and `b` must be numbers
+* The function must return a number
+
+---
+
+### 📌 Example 2: Greet Function
+
+```ts
+function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+```
+
+---
+
+## 🔸 2. Functions with Optional Parameters
+
+Use `?` to mark a parameter as optional.
+
+```ts
+function log(message: string, userId?: number): void {
+  if (userId !== undefined) {
+    console.log(`User #${userId}: ${message}`);
+  } else {
+    console.log(message);
+  }
+}
+```
+
+---
+
+## 🔸 3. Default Parameters
+
+You can also set default values:
+
+```ts
+function multiply(a: number, b: number = 2): number {
+  return a * b;
+}
+
+console.log(multiply(5)); // 10
+```
+
+---
+
+## 🔸 4. Arrow Functions with Types
+
+### 📌 Example:
+
+```ts
+const subtract = (x: number, y: number): number => {
+  return x - y;
+};
+```
+
+---
+
+## 🔸 5. Function Returning `void` or `never`
+
+### `void`: No return value.
+
+```ts
+function sayHi(): void {
+  console.log("Hi");
+}
+```
+
+### `never`: Function never finishes (throws or loops forever).
+
+```ts
+function throwError(message: string): never {
+  throw new Error(message);
+}
+```
+
+---
+
+## 🔸 6. Function Type Aliases
+
+You can describe the function type using a `type` alias:
+
+```ts
+type Operation = (a: number, b: number) => number;
+
+const divide: Operation = (a, b) => a / b;
+```
+
+---
+
+## 🔸 7. Using Interfaces for Functions
+
+```ts
+interface Formatter {
+  (value: string): string;
+}
+
+const toUpper: Formatter = (val) => val.toUpperCase();
+```
+
+---
+
+## ✅ Summary
+
+| Concept           | Example                                       |
+| ----------------- | --------------------------------------------- |
+| Typed params      | `function greet(name: string)`                |
+| Typed return      | `: string`, `: number`, `: void`, `: never`   |
+| Optional param    | `userId?: number`                             |
+| Arrow function    | `(a: number) => number`                       |
+| Type alias for fn | `type Sum = (a: number, b: number) => number` |
+
+---
+
+Would you like a few practice problems with typed functions?
