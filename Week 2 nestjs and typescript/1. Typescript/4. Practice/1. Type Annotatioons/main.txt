@@ -1,0 +1,159 @@
+Sure! Let's go through each of these TypeScript types **one by one** with detailed explanations and code examples. I'll explain what they mean, when to use them, and how they behave.
+
+---
+
+### 1. **Type annotations**
+
+Type annotations tell TypeScript what type a variable, parameter, or function return should be.
+
+---
+
+### 2. **`string`**
+
+* Represents text values.
+* Variables of type `string` can only hold string values.
+
+```typescript
+let username: string = "Alice";
+username = "Bob";  // OK
+// username = 123; // Error: Type 'number' is not assignable to type 'string'
+```
+
+---
+
+### 3. **`number`**
+
+* Represents numeric values (both integers and floats).
+
+```typescript
+let age: number = 25;
+age = 30.5;  // OK
+// age = "25"; // Error: Type 'string' is not assignable to type 'number'
+```
+
+---
+
+### 4. **`boolean`**
+
+* Represents `true` or `false`.
+
+```typescript
+let isActive: boolean = true;
+isActive = false;  // OK
+// isActive = "yes"; // Error: Type 'string' is not assignable to type 'boolean'
+```
+
+---
+
+### 5. **`any`**
+
+* This type disables type checking.
+* Can hold *any* type of value.
+* Useful when you want to gradually migrate JavaScript to TypeScript or when you don't know the type in advance.
+* **Not recommended** for regular use because it removes the safety TypeScript provides.
+
+```typescript
+let anything: any = 5;
+anything = "hello";  // OK
+anything = true;     // OK
+```
+
+---
+
+### 6. **`unknown`**
+
+* Similar to `any` but safer.
+* You can assign any value to `unknown`.
+* But you **cannot** use it directly without type-checking first.
+* This forces you to check the type before using the value, preventing runtime errors.
+
+```typescript
+let value: unknown = 10;
+value = "hello";  // OK
+value = true;     // OK
+
+// Can't do this directly:
+// let str: string = value;  // Error: Type 'unknown' is not assignable to type 'string'
+
+// Need type-checking first:
+if (typeof value === "string") {
+  let str: string = value;  // OK
+}
+```
+
+---
+
+### 7. **`void`**
+
+* Represents the absence of a value.
+* Mostly used as a function return type for functions that **do not return anything**.
+
+```typescript
+function logMessage(message: string): void {
+  console.log(message);
+}
+// The function returns nothing (void)
+```
+
+---
+
+### 8. **`never`**
+
+* Represents values that never occur.
+* Used for functions that **never return** (e.g., functions that throw errors or have infinite loops).
+* Useful to indicate unreachable code.
+
+```typescript
+function throwError(message: string): never {
+  throw new Error(message);
+}
+
+function infiniteLoop(): never {
+  while (true) {
+    // forever
+  }
+}
+```
+
+---
+
+## Summary Table
+
+| Type      | Usage                       | Example                                      |
+| --------- | --------------------------- | -------------------------------------------- |
+| `string`  | Text values                 | `let name: string = "Alice";`                |
+| `number`  | Numeric values              | `let age: number = 25;`                      |
+| `boolean` | true or false               | `let isActive: boolean = true;`              |
+| `any`     | Any type, disables checking | `let val: any = "hello";`                    |
+| `unknown` | Any type, safer than `any`  | `let val: unknown = 10;`                     |
+| `void`    | Function returns nothing    | `function f(): void {}`                      |
+| `never`   | Function never returns      | `function f(): never { throw new Error(); }` |
+
+---
+
+### Full example combining these types:
+
+```typescript
+function processValue(value: unknown): void {
+  if (typeof value === "string") {
+    console.log("String value:", value.toUpperCase());
+  } else if (typeof value === "number") {
+    console.log("Number value:", value.toFixed(2));
+  } else if (typeof value === "boolean") {
+    console.log("Boolean value:", value ? "Yes" : "No");
+  } else {
+    console.log("Unknown type");
+  }
+}
+
+let anything: any = "hello";
+processValue(anything);  // String value: HELLO
+
+function fail(): never {
+  throw new Error("This always fails");
+}
+```
+
+---
+
+If you want, I can help you with more examples or explain advanced types! Just ask.
