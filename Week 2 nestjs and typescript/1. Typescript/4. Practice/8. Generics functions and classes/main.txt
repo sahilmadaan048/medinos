@@ -1,0 +1,123 @@
+Let's explore **Generics** in TypeScript, focusing on both **Functions** and **Classes**. Generics allow your code to be **reusable** and **type-safe** while staying flexible.
+
+---
+
+## 🔷 What Are Generics?
+
+Generics are placeholders for types. Instead of hardcoding types, you use **type parameters** that get replaced when the function or class is used.
+
+---
+
+## 🔹 1. Generic Functions
+
+### ✅ Basic Example
+
+```ts
+function identity<T>(value: T): T {
+  return value;
+}
+
+console.log(identity<string>("Hello")); // Hello
+console.log(identity<number>(123));     // 123
+```
+
+Here:
+
+* `T` is a generic type parameter.
+* The actual type is provided when calling the function (`<string>`, `<number>`).
+
+---
+
+### 🔸 Inferred Generic Type
+
+You don't always need to explicitly pass the type. TypeScript can infer it:
+
+```ts
+const result = identity("TypeScript"); // TypeScript inferred as string
+```
+
+---
+
+### 🔸 Multiple Generic Types
+
+```ts
+function pair<K, V>(key: K, value: V): [K, V] {
+  return [key, value];
+}
+
+const result = pair<number, string>(1, "One"); // [1, "One"]
+```
+
+---
+
+## 🔹 2. Generic Constraints
+
+You can restrict what kind of types are allowed using `extends`.
+
+```ts
+function logLength<T extends { length: number }>(item: T): void {
+  console.log(item.length);
+}
+
+logLength("Hello");         // ✅ Works (string has length)
+logLength([1, 2, 3]);        // ✅ Works (array has length)
+// logLength(42);            ❌ Error (number has no length)
+```
+
+---
+
+## 🔹 3. Generic Classes
+
+You can also create classes that work with generics.
+
+### ✅ Example: Box class
+
+```ts
+class Box<T> {
+  private contents: T;
+
+  constructor(value: T) {
+    this.contents = value;
+  }
+
+  getContents(): T {
+    return this.contents;
+  }
+}
+
+const numberBox = new Box<number>(123);
+console.log(numberBox.getContents()); // 123
+
+const stringBox = new Box<string>("TypeScript");
+console.log(stringBox.getContents()); // TypeScript
+```
+
+---
+
+## 🔹 4. Default Generic Type
+
+```ts
+function wrapInArray<T = string>(value: T): T[] {
+  return [value];
+}
+
+const defaultWrapped = wrapInArray("hi"); // inferred as string[]
+const numberWrapped = wrapInArray<number>(10); // number[]
+```
+
+---
+
+## ✅ Summary
+
+| Use Case         | Syntax Example                       |
+| ---------------- | ------------------------------------ |
+| Generic function | `function<T>(arg: T): T {}`          |
+| Inferred type    | `identity("test")`                   |
+| Constraints      | `T extends SomeType`                 |
+| Multiple types   | `<K, V>(k: K, v: V): [K, V]`         |
+| Generic class    | `class Box<T> { constructor(x: T) }` |
+| Default type     | `<T = string>(val: T): T[]`          |
+
+---
+
+Would you like a real-world example using generics (like a `DataStore<T>` or a `Queue<T>`) to reinforce this?
