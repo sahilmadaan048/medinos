@@ -1,0 +1,153 @@
+
+Absolutely! Let's dive deep into **Enums** and **Literal Types** in TypeScript — both are useful when working with fixed sets of values but serve different purposes.
+
+---
+
+## 🔹 1. Enums
+
+### ✅ What is an Enum?
+
+An `enum` (short for **enumeration**) is a way to **define a set of named constants**. It's useful when you want to represent a fixed number of possible values.
+
+### 🔸 Syntax:
+
+```ts
+enum Direction {
+  Up,
+  Down,
+  Left,
+  Right,
+}
+```
+
+By default, enum values start at 0 and increment by 1.
+
+---
+
+### 📌 Example 1: Numeric Enum
+
+```ts
+enum Status {
+  Pending,    // 0
+  Approved,   // 1
+  Rejected    // 2
+}
+
+let s: Status = Status.Approved;
+console.log(s); // 1
+```
+
+---
+
+### 📌 Example 2: String Enum
+
+```ts
+enum Role {
+  Admin = "admin",
+  User = "user",
+  Guest = "guest"
+}
+
+function getPermissions(role: Role) {
+  if (role === Role.Admin) return "All Access";
+  if (role === Role.User) return "Limited Access";
+  return "Read Only";
+}
+
+console.log(getPermissions(Role.User)); // Limited Access
+```
+
+---
+
+### 📌 Example 3: Reverse Mapping (only for numeric enums)
+
+```ts
+enum Colors {
+  Red,
+  Green,
+  Blue
+}
+
+console.log(Colors[1]); // Green
+```
+
+---
+
+## 🔸 When to Use Enums?
+
+* When you want a **named group of constants**
+* When values are used **throughout your code**
+* When **readability and maintainability** are important
+
+---
+
+## 🔹 2. Literal Types
+
+### ✅ What is a Literal Type?
+
+Literal types allow you to specify **exact** string, number, or boolean values a variable can hold.
+
+### 🔸 Syntax:
+
+```ts
+type Direction = "up" | "down" | "left" | "right";
+```
+
+---
+
+### 📌 Example 1: Literal Union
+
+```ts
+type Status = "pending" | "approved" | "rejected";
+
+function updateStatus(status: Status) {
+  console.log("Status updated to:", status);
+}
+
+updateStatus("approved");  // ✅ OK
+// updateStatus("done");   // ❌ Error
+```
+
+---
+
+### 📌 Example 2: Literal + Type Narrowing
+
+```ts
+type ButtonSize = "small" | "medium" | "large";
+
+function renderButton(size: ButtonSize) {
+  if (size === "small") return "Rendering small button";
+  if (size === "medium") return "Rendering medium button";
+  return "Rendering large button";
+}
+```
+
+---
+
+## 🆚 Enum vs Literal Types
+
+| Feature         | Enum                                 | Literal Types                        |
+| --------------- | ------------------------------------ | ------------------------------------ |
+| Syntax          | `enum Role { Admin, User }`          | `type Role = "admin" \| "user"`      |
+| JavaScript code | Compiles to real JS object           | Type-only (erased at runtime)        |
+| Use when        | Shared constants, reusable enums     | Few string/number values, simple use |
+| Pros            | Readable, reverse-mapping, organized | Lightweight, no JS output            |
+| Cons            | Extra JS code, sometimes overkill    | Can't be reused at runtime directly  |
+
+---
+
+## ✅ Summary
+
+* Use **Enums** when:
+
+  * You need a **runtime object**
+  * You have lots of reusable, named constants
+
+* Use **Literal Types** when:
+
+  * You want **lightweight type checking**
+  * You’re validating against a **fixed set of values**
+
+---
+
+Would you like practice tasks to test your understanding of Enums and Literal Types?
