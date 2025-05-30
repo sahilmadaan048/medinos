@@ -1,0 +1,177 @@
+=Let's explore how **Classes**, **Inheritance**, and **Access Modifiers** (`public`, `private`, `protected`) work in **TypeScript**, with simple and clear examples.
+
+---
+
+## 🔷 1. Classes in TypeScript
+
+A class is a blueprint to create objects with properties and methods.
+
+### ✅ Basic Syntax:
+
+```ts
+class Person {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  greet(): void {
+    console.log(`Hello, my name is ${this.name}`);
+  }
+}
+
+const user = new Person("Sahil");
+user.greet(); // Hello, my name is Sahil
+```
+
+---
+
+## 🔷 2. Inheritance
+
+TypeScript supports **class inheritance** using the `extends` keyword.
+
+```ts
+class Animal {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  move(distance: number): void {
+    console.log(`${this.name} moved ${distance}m.`);
+  }
+}
+
+class Dog extends Animal {
+  bark(): void {
+    console.log("Woof!");
+  }
+}
+
+const dog = new Dog("Tommy");
+dog.bark();            // Woof!
+dog.move(10);          // Tommy moved 10m.
+```
+
+The `Dog` class **inherits** properties and methods from `Animal`.
+
+---
+
+## 🔷 3. Access Modifiers
+
+### 🔸 `public` (default)
+
+* Accessible from **anywhere**.
+
+```ts
+class User {
+  public name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  public greet(): void {
+    console.log("Hi", this.name);
+  }
+}
+```
+
+---
+
+### 🔸 `private`
+
+* Accessible **only inside** the class.
+
+```ts
+class BankAccount {
+  private balance: number = 1000;
+
+  private logBalance(): void {
+    console.log(`Balance is ${this.balance}`);
+  }
+
+  public showBalance(): void {
+    this.logBalance();
+  }
+}
+
+const acc = new BankAccount();
+// acc.balance = 0;        ❌ Error: private
+// acc.logBalance();       ❌ Error: private
+acc.showBalance();         // ✅ Allowed via public method
+```
+
+---
+
+### 🔸 `protected`
+
+* Accessible **within the class** and its **subclasses**, but not outside.
+
+```ts
+class Employee {
+  protected department: string;
+
+  constructor(department: string) {
+    this.department = department;
+  }
+}
+
+class Manager extends Employee {
+  showDepartment(): void {
+    console.log("Department:", this.department); // ✅ OK
+  }
+}
+
+const mgr = new Manager("IT");
+// mgr.department; // ❌ Error: protected
+mgr.showDepartment(); // ✅ Department: IT
+```
+
+---
+
+## ✅ Summary Table
+
+| Modifier    | Same class | Subclass | Outside class |
+| ----------- | ---------- | -------- | ------------- |
+| `public`    | ✅          | ✅        | ✅             |
+| `private`   | ✅          | ❌        | ❌             |
+| `protected` | ✅          | ✅        | ❌             |
+
+---
+
+## 🧪 Bonus: `readonly` Modifier
+
+* Prevents reassignment after initialization.
+
+```ts
+class Book {
+  readonly title: string;
+
+  constructor(title: string) {
+    this.title = title;
+  }
+
+  describe(): void {
+    console.log(this.title);
+  }
+}
+
+const book = new Book("TypeScript Guide");
+// book.title = "New Title"; ❌ Error: title is readonly
+```
+
+---
+
+## ✅ Recap
+
+* Use `class` to define reusable object blueprints.
+* `extends` enables inheritance.
+* Use access modifiers for **encapsulation** and **safety**.
+* Use `readonly` for constant properties.
+
+---
+
+Would you like to see an example involving inheritance, modifiers, and a real-world model like `Vehicle → Car → ElectricCar`?
