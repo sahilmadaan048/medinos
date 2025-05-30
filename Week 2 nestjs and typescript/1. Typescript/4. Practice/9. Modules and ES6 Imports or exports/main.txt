@@ -1,0 +1,131 @@
+Let's dive into **Modules and ES6 Imports/Exports** in TypeScript (which follows the ES6 module system). Modules help organize code by splitting it into separate files and exposing only what's needed.
+
+---
+
+## 🔷 1. What Are Modules?
+
+In TypeScript (and JavaScript ES6), **each file is a module**. You can **export** variables, functions, classes, or types from one file and **import** them in another.
+
+---
+
+## 🔹 2. `export`: Making Code Available to Other Files
+
+### ✅ Named Exports
+
+```ts
+// mathUtils.ts
+export function add(a: number, b: number): number {
+  return a + b;
+}
+
+export const PI = 3.14159;
+```
+
+### ✅ Default Export
+
+```ts
+// logger.ts
+export default function log(message: string): void {
+  console.log(`[LOG]: ${message}`);
+}
+```
+
+---
+
+## 🔹 3. `import`: Bringing Code into a File
+
+### ✅ Import Named Exports
+
+```ts
+// main.ts
+import { add, PI } from './mathUtils';
+
+console.log(add(2, 3));      // 5
+console.log(PI);             // 3.14159
+```
+
+✅ You can **rename** while importing:
+
+```ts
+import { add as sum } from './mathUtils';
+console.log(sum(1, 2));
+```
+
+---
+
+### ✅ Import Default Export
+
+```ts
+import log from './logger';
+
+log("Application started."); // [LOG]: Application started.
+```
+
+---
+
+### ✅ Import Everything
+
+```ts
+import * as math from './mathUtils';
+
+console.log(math.add(5, 6)); // 11
+console.log(math.PI);        // 3.14159
+```
+
+---
+
+## 🔹 4. Exporting Types & Interfaces
+
+```ts
+// types.ts
+export interface User {
+  id: number;
+  name: string;
+}
+
+export type Status = "active" | "inactive";
+```
+
+```ts
+// main.ts
+import { User, Status } from './types';
+
+const user: User = { id: 1, name: "Sahil" };
+let currentStatus: Status = "active";
+```
+
+---
+
+## 🔹 5. Re-Exporting
+
+You can re-export from another module:
+
+```ts
+// allUtils.ts
+export * from './mathUtils';
+export * from './logger';
+```
+
+---
+
+## ✅ Summary Table
+
+| Syntax                     | Meaning                           |
+| -------------------------- | --------------------------------- |
+| `export function foo() {}` | Named export                      |
+| `export default foo`       | Default export                    |
+| `import { foo } from`      | Import named export               |
+| `import foo from`          | Import default export             |
+| `import * as utils from`   | Import all exports as a namespace |
+
+---
+
+## 🛠️ Important Notes
+
+* Use `.ts` or `.js` extensions depending on your setup.
+* TypeScript will respect module resolution rules (`tsconfig.json` → `"module": "ES6"` or `"NodeNext"`).
+* **Always keep related logic in separate modules for scalability.**
+
+---
+
+Would you like a sample folder structure using modules (e.g., `utils/`, `models/`, `services/`) to see how it fits in a real project?
