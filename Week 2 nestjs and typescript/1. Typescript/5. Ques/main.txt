@@ -1,0 +1,6 @@
+Summary
+TypeScript makes functions type-safe using annotations.
+
+Interfaces define contracts for object shapes.
+
+This improves readability, refactoring, and bug prevention.
