@@ -1,0 +1,104 @@
+Let's dive into Union Types and Intersection Types in TypeScript with clear explanations and code examples!
+
+🔹 1. Union Types (|)
+A union type allows a variable to hold multiple types, but only one at a time.
+
+✅ Syntax:
+ts
+Copy
+Edit
+type AorB = TypeA | TypeB;
+📌 Example 1: Simple Union
+ts
+Copy
+Edit
+let value: string | number;
+
+value = "hello";  // ✅ OK
+value = 42;       // ✅ OK
+// value = true;  // ❌ Error: boolean not allowed
+📌 Example 2: Union with Type Aliases
+ts
+Copy
+Edit
+type ID = string | number;
+
+function printId(id: ID) {
+  console.log("Your ID is:", id);
+}
+You can pass either a string or a number.
+
+📌 Example 3: Narrowing with Type Guards
+ts
+Copy
+Edit
+function printLength(input: string | string[]) {
+  if (typeof input === "string") {
+    console.log(input.length); // string method
+  } else {
+    console.log(input.length); // array method
+  }
+}
+🔸 2. Intersection Types (&)
+An intersection type combines multiple types into one, requiring all their properties.
+
+✅ Syntax:
+ts
+Copy
+Edit
+type AB = TypeA & TypeB;
+📌 Example 1: Combine Object Types
+ts
+Copy
+Edit
+type Person = {
+  name: string;
+};
+
+type Employee = {
+  employeeId: number;
+};
+
+type Staff = Person & Employee;
+
+const user: Staff = {
+  name: "Sahil",
+  employeeId: 101
+};
+The variable user must have all properties from both Person and Employee.
+
+📌 Example 2: Function Intersection
+ts
+Copy
+Edit
+type Logger = () => void;
+type ErrorHandler = (err: Error) => void;
+
+type AppFunction = Logger & ErrorHandler; // Usually impractical but possible in theory
+But intersections are most useful with object types.
+
+✅ Union vs Intersection Summary
+| Feature | Union (|) | Intersection (&) |
+|----------------|------------------------------------|----------------------------------------|
+| Meaning | One or another | Both combined together |
+| Use-case | When value can be of multiple types | When value must satisfy multiple types |
+| Example | string \| number | {name: string} & {age: number} |
+
+🧪 Quick Exercise
+Try defining a type for a user that can be either:
+
+A Guest ({ username: string })
+
+Or an Admin ({ username: string, role: "admin" })
+
+That would be a union.
+
+And if you want to define a type that has all properties from:
+
+Person: { name: string }
+
+Location: { city: string }
+
+That would be an intersection.
+
+Would you like to try these examples interactively with short tasks?
