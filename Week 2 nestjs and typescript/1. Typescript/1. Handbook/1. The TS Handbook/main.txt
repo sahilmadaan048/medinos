@@ -1,1 +1,185 @@
 https://www.typescriptlang.org/docs/handbook/intro.html
+
+
+The article "The Basics" from the TypeScript Handbook introduces fundamental concepts of TypeScript's type system, emphasizing how types enhance code safety and clarity. Here's a concise summary of the key topics discussed, along with illustrative code examples:([TypeScript][1])
+
+---
+
+### 🔹 Understanding JavaScript Values and Operations
+
+In JavaScript, the behavior of operations depends on the type of the value involved. For instance:([TypeScript][1])
+
+```typescript
+// Accessing the 'toLowerCase' method on 'message'
+message.toLowerCase();
+
+// Attempting to call 'message' as a function
+message();
+```
+
+
+
+Without knowing the type of `message`, it's unclear whether these operations are valid. TypeScript addresses this uncertainty by allowing developers to specify types, enabling the compiler to catch potential errors at compile time.([TypeScript][1])
+
+---
+
+### 🔹 Type Annotations and Inference
+
+TypeScript allows you to annotate variables with specific types:
+
+```typescript
+let message: string = "Hello, world!";
+```
+
+
+
+However, TypeScript can also infer types based on assigned values:([TypeScript][2])
+
+```typescript
+let message = "Hello, world!"; // Inferred as string
+```
+
+
+
+This type inference helps reduce redundancy while maintaining type safety.([TypeScript][2])
+
+---
+
+### 🔹 Basic Types
+
+TypeScript introduces several basic types to represent different kinds of values:([TypeScript][3])
+
+* **Boolean**: Represents true/false values.([TypeScript][4])
+
+```typescript
+  let isDone: boolean = false;
+```
+
+
+
+* **Number**: Supports decimal, hexadecimal, binary, and octal literals.([TypeScript][4])
+
+```typescript
+  let decimal: number = 6;
+  let hex: number = 0xf00d;
+  let binary: number = 0b1010;
+  let octal: number = 0o744;
+```
+
+
+
+* **BigInt**: For arbitrarily large integers.([Wikipedia][5])
+
+```typescript
+  let big: bigint = 100n;
+```
+
+
+
+* **String**: Textual data.([TypeScript][6])
+
+```typescript
+  let color: string = "blue";
+```
+
+
+
+* **Array**: A collection of values.([TypeScript][1])
+
+```typescript
+  let list: number[] = [1, 2, 3];
+  let list: Array<number> = [1, 2, 3];
+```
+
+
+
+* **Tuple**: An array with a fixed number of elements of specific types.
+
+```typescript
+  let x: [string, number];
+  x = ["hello", 10];
+```
+
+
+
+* **Enum**: A way to define named constants.
+
+```typescript
+  enum Color {Red, Green, Blue}
+  let c: Color = Color.Green;
+```
+
+
+
+* **Any**: A type that disables type checking.([TypeScript][7])
+
+```typescript
+  let notSure: any = 4;
+  notSure = "maybe a string instead";
+  notSure = false;
+```
+
+
+
+* **Void**: Represents the absence of any type, commonly used for functions that do not return a value.
+
+```typescript
+  function warnUser(): void {
+    console.log("This is my warning message");
+  }
+```
+
+
+
+* **Null and Undefined**: Represent absence of value.([TypeScript][8])
+
+```typescript
+  let u: undefined = undefined;
+  let n: null = null;
+```
+
+
+
+* **Never**: Represents values that never occur, such as functions that always throw an error.
+
+```typescript
+  function error(message: string): never {
+    throw new Error(message);
+  }
+```
+
+
+
+* **Object**: Represents non-primitive types.([Wikipedia][5])
+
+```typescript
+  declare function create(o: object | null): void;
+```
+
+
+
+---
+
+### 🔹 Type Assertions
+
+Type assertions allow you to override TypeScript's inferred type:([TypeScript][2])
+
+```typescript
+let someValue: unknown = "this is a string";
+
+let strLength: number = (someValue as string).length;
+```
+
+
+
+Alternatively, using angle-bracket syntax:
+
+```typescript
+let strLength: number = (<string>someValue).length;
+```
+
+
+
+---
+
+These foundational concepts in TypeScript's type system help developers write safer and more predictable code by catching errors at compile time and providing clearer documentation through explicit type annotations.
