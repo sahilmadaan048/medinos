@@ -1,0 +1,197 @@
+The "Object Types" chapter in the TypeScript Handbook explores how TypeScript models JavaScript objects with enhanced type safety and expressiveness. Here's a concise summary with illustrative code examples:
+
+---
+
+### 🔹 Defining Object Types
+
+TypeScript allows you to define object types in several ways:
+
+* **Anonymous Types**: Define object shapes inline.
+
+```typescript
+  function greet(person: { name: string; age: number }) {
+    return "Hello " + person.name;
+  }
+```
+
+
+
+* **Interfaces**: Create reusable object type definitions.
+
+```typescript
+  interface Person {
+    name: string;
+    age: number;
+  }
+
+  function greet(person: Person) {
+    return "Hello " + person.name;
+  }
+```
+
+
+
+* **Type Aliases**: Another way to name object types.
+
+```typescript
+  type Person = {
+    name: string;
+    age: number;
+  };
+
+  function greet(person: Person) {
+    return "Hello " + person.name;
+  }
+```
+
+
+
+These approaches help in structuring and reusing object types effectively.([typescriptlang.org][1])
+
+---
+
+### 🔹 Property Modifiers
+
+TypeScript provides modifiers to control object properties:
+
+* **Optional Properties**: Use `?` to denote properties that may be undefined.
+
+```typescript
+  interface PaintOptions {
+    shape: Shape;
+    xPos?: number;
+    yPos?: number;
+  }
+```
+
+
+
+* **Read-Only Properties**: Use `readonly` to prevent reassignment.
+
+```typescript
+  interface SomeType {
+    readonly prop: string;
+  }
+```
+
+
+
+These modifiers enhance type safety by clearly specifying property behaviors.
+
+---
+
+### 🔹 Index Signatures
+
+When the exact property names are unknown, index signatures allow for flexible property definitions:
+
+```typescript
+interface StringArray {
+  [index: number]: string;
+}
+```
+
+
+
+This example defines an object type where keys are numbers and values are strings.
+
+---
+
+### 🔹 Extending Types
+
+TypeScript supports extending existing types to create new ones:
+
+* **Interfaces**: Use `extends` to build upon existing interfaces.
+
+```typescript
+  interface BasicAddress {
+    name: string;
+    street: string;
+    city: string;
+    country: string;
+    postalCode: string;
+  }
+
+  interface AddressWithUnit extends BasicAddress {
+    unit: string;
+  }
+```
+
+
+
+* **Type Aliases**: Combine types using intersections.
+
+```typescript
+  type Colorful = {
+    color: string;
+  };
+
+  type Circle = {
+    radius: number;
+  };
+
+  type ColorfulCircle = Colorful & Circle;
+```
+
+
+
+These mechanisms promote code reuse and composability.
+
+---
+
+### 🔹 Discriminated Unions
+
+Discriminated unions enable handling of different object shapes in a type-safe manner:
+
+```typescript
+interface Circle {
+  kind: "circle";
+  radius: number;
+}
+
+interface Square {
+  kind: "square";
+  sideLength: number;
+}
+
+type Shape = Circle | Square;
+
+function getArea(shape: Shape): number {
+  switch (shape.kind) {
+    case "circle":
+      return Math.PI * shape.radius ** 2;
+    case "square":
+      return shape.sideLength ** 2;
+  }
+}
+```
+
+
+
+By using a common `kind` property, TypeScript can narrow down the specific type within a union.
+
+---
+
+### 🔹 Optional Properties and Excess Property Checks
+
+TypeScript performs excess property checks to catch typos or unintended properties:
+
+```typescript
+interface SquareConfig {
+  color?: string;
+  width?: number;
+}
+
+let mySquare = createSquare({ colour: "red", width: 100 });
+```
+
+
+
+In this example, `colour` is not a defined property in `SquareConfig`, so TypeScript will flag it as an error.
+
+---
+
+Understanding object types in TypeScript is fundamental for modeling complex data structures with precision and safety.
+
+For more detailed information, refer to the full article: [Object Types - TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/2/objects.html).
+
+[1]: https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html?utm_source=chatgpt.com "Documentation - TypeScript for JavaScript Programmers"
