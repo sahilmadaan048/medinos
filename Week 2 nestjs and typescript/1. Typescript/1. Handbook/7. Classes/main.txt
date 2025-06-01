@@ -1,0 +1,173 @@
+The "Classes" chapter in the TypeScript Handbook provides a comprehensive overview of how TypeScript enhances JavaScript classes with static typing and additional features. Here's a concise summary with illustrative code examples:
+
+---
+
+### 🔹 Class Members
+
+**Fields**: Define properties within a class.
+
+```typescript
+class Point {
+  x: number;
+  y: number;
+}
+
+const pt = new Point();
+pt.x = 0;
+pt.y = 0;
+```
+
+
+
+Fields can have initializers, and their types can be inferred from these initial values.([typescriptlang.org][1])
+
+**Constructors**: Special methods for initializing new instances.
+
+```typescript
+class Point {
+  x: number;
+  y: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+}
+```
+
+
+
+**Methods**: Functions associated with a class.
+
+```typescript
+class Point {
+  x: number;
+  y: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  distance(): number {
+    return Math.sqrt(this.x ** 2 + this.y ** 2);
+  }
+}
+```
+
+
+
+---
+
+### 🔹 Inheritance
+
+TypeScript supports class inheritance using the `extends` keyword.
+
+```typescript
+class Animal {
+  move(distanceInMeters: number) {
+    console.log(`Animal moved ${distanceInMeters}m.`);
+  }
+}
+
+class Dog extends Animal {
+  bark() {
+    console.log("Woof! Woof!");
+  }
+}
+
+const dog = new Dog();
+dog.bark();
+dog.move(10);
+```
+
+
+
+---
+
+### 🔹 Modifiers
+
+* **`public`**: Default. Members are accessible from anywhere.
+* **`private`**: Members are accessible only within the class.
+* **`protected`**: Members are accessible within the class and its subclasses.([typescriptlang.org][2])
+
+```typescript
+class Animal {
+  private name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+```
+
+
+
+Attempting to access `name` outside the class will result in an error.([typescriptlang.org][3])
+
+---
+
+### 🔹 Static Members
+
+Define members that belong to the class itself rather than to instances.([typescriptlang.org][4])
+
+```typescript
+class Grid {
+  static origin = { x: 0, y: 0 };
+}
+```
+
+
+
+Access static members using the class name: `Grid.origin`.
+
+---
+
+### 🔹 Abstract Classes
+
+Classes that cannot be instantiated directly and may contain abstract methods.([typescriptlang.org][5])
+
+```typescript
+abstract class Animal {
+  abstract makeSound(): void;
+
+  move(): void {
+    console.log("Moving...");
+  }
+}
+```
+
+
+
+Subclasses must implement the abstract methods.
+
+---
+
+### 🔹 Using a Class as an Interface
+
+A class declaration creates both a type and a constructor function. The class type can be used in places where interfaces are expected.([typescriptlang.org][5])
+
+```typescript
+class Point {
+  x: number;
+  y: number;
+}
+
+interface Point3D extends Point {
+  z: number;
+}
+
+const point3D: Point3D = { x: 1, y: 2, z: 3 };
+```
+
+
+
+---
+
+For more detailed information, refer to the full article: [Classes - TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/2/classes.html).
+
+[1]: https://www.typescriptlang.org/docs/handbook/2/classes.html?utm_source=chatgpt.com "Documentation - Classes - TypeScript"
+[2]: https://www.typescriptlang.org/docs/handbook/2/basic-types.html?utm_source=chatgpt.com "Documentation - The Basics - TypeScript"
+[3]: https://www.typescriptlang.org/play/javascript/working-with-classes/classes-101.ts.html?utm_source=chatgpt.com "Playground Example - Classes 101 - TypeScript"
+[4]: https://www.typescriptlang.org/docs/handbook/2/generics.html?utm_source=chatgpt.com "Generics - TypeScript: Documentation"
+[5]: https://www.typescriptlang.org/docs/handbook/classes.html?utm_source=chatgpt.com "Handbook - Classes - TypeScript"
