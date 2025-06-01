@@ -1,0 +1,241 @@
+// will do it from handbook
+
+The "Everyday Types" chapter in the TypeScript Handbook introduces commonly used types that are foundational for writing robust TypeScript code. Here's a concise summary with illustrative code examples:
+
+---
+
+### 🔹 Primitive Types
+
+TypeScript provides type annotations for JavaScript's basic primitives:([Wikipedia][1])
+
+* **`string`**: Represents textual data.([typescriptlang.org][2])
+
+```typescript
+  let name: string = "Alice";
+```
+
+
+
+* **`number`**: Represents numeric values.([typescriptlang.org][3])
+
+```typescript
+  let age: number = 30;
+```
+
+
+
+* **`boolean`**: Represents logical true/false.([typescriptlang.org][3])
+
+```typescript
+  let isActive: boolean = true;
+```
+
+
+
+These types help in catching errors and providing better tooling support.
+
+---
+
+### 🔹 Arrays
+
+Arrays can be typed in two ways:([Wikipedia][1])
+
+* Using square brackets:
+
+```typescript
+  let numbers: number[] = [1, 2, 3];
+```
+
+
+
+* Using generic syntax:
+
+```typescript
+  let strings: Array<string> = ["a", "b", "c"];
+```
+
+
+
+Both approaches ensure that array elements are of the specified type.
+
+---
+
+### 🔹 Object Types
+
+TypeScript allows defining the shape of objects:
+
+```typescript
+let person: { name: string; age: number } = {
+  name: "Bob",
+  age: 25
+};
+```
+
+
+
+This ensures that objects have the required properties with correct types.
+
+---
+
+### 🔹 Functions
+
+Function types specify parameter and return types:([Wikipedia][1])
+
+```typescript
+function greet(name: string): string {
+  return "Hello, " + name;
+}
+```
+
+
+
+This provides clarity on what inputs a function expects and what it returns.
+
+---
+
+### 🔹 Union Types
+
+Union types allow variables to hold values of multiple types:
+
+```typescript
+function printId(id: number | string) {
+  console.log("Your ID is: " + id);
+}
+```
+
+
+
+This is useful when a value can be of more than one type.
+
+---
+
+### 🔹 Type Aliases
+
+Type aliases create new names for types:
+
+```typescript
+type Point = {
+  x: number;
+  y: number;
+};
+
+let center: Point = { x: 0, y: 0 };
+```
+
+
+
+They help in making complex types more readable and reusable.
+
+---
+
+### 🔹 Interfaces
+
+Interfaces define the structure of objects:
+
+```typescript
+interface User {
+  name: string;
+  id: number;
+}
+
+let user: User = { name: "Carol", id: 1 };
+```
+
+
+
+Interfaces are similar to type aliases but are more extensible.
+
+---
+
+### 🔹 Type Assertions
+
+Type assertions override TypeScript's inferred type:
+
+```typescript
+let someValue: unknown = "this is a string";
+let strLength: number = (someValue as string).length;
+```
+
+
+
+This tells the compiler to treat a value as a specific type.([typescriptlang.org][4])
+
+---
+
+### 🔹 Literal Types
+
+Literal types restrict variables to exact values:([typescriptlang.org][5])
+
+```typescript
+type Direction = "up" | "down" | "left" | "right";
+```
+
+
+
+They are useful for functions that accept a limited set of values.
+
+---
+
+### 🔹 Null and Undefined
+
+TypeScript distinguishes between `null` and `undefined`:([typescriptlang.org][4])
+
+```typescript
+let u: undefined = undefined;
+let n: null = null;
+```
+
+
+
+Strict null checks can be enabled to prevent assigning `null` or `undefined` to variables unintentionally.
+
+---
+
+### 🔹 The `any` Type
+
+The `any` type disables type checking:
+
+```typescript
+let notSure: any = 4;
+notSure = "maybe a string instead";
+```
+
+
+
+Use `any` sparingly, as it can lead to runtime errors.
+
+---
+
+### 🔹 The `unknown` Type
+
+The `unknown` type is safer than `any`:
+
+```typescript
+let value: unknown = 30;
+```
+
+
+
+You must perform type checking before performing operations on `unknown` types.
+
+---
+
+### 🔹 The `never` Type
+
+The `never` type represents values that never occur:
+
+```typescript
+function error(message: string): never {
+  throw new Error(message);
+}
+```
+
+
+
+It's used for functions that always throw errors or never return.
+
+---
+
+These everyday types form the backbone of TypeScript's type system, enabling developers to write safer and more predictable code.
+
+For more detailed information, refer to the full article: [Everyday Types - TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html).
