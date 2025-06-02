@@ -58,3 +58,30 @@ npm install --save-dev @types/passport-jwt
 
 nest g module profile 
 nest g controller profile 
+
+swagger setup
+
+
+to do nice documentation
+
+npm install --save @nestjs/swagger swagger-ui-express
+
+npm install --save @nestjs/swagger fastify-swagger
+
+npm i @nestjs/swagger
+
+
+dECORATROS ADDED to make the api documentation useful
+
+
+@ApiTags('tag name')  -> custom name which will get displayed on /api route on docs 
+@ApiProperty()  -> to enable the api route properies in the dtos defined 
+@ApiOperation({summary: 'summary of the apu request route'})   
+@ApiResponse({status: 201, description: 'User created successfully', type: CreateUserResponseDto})  -> description of the response body
+@ApiBearerAuth()
+
+
+
+refrerence link youtube
+
+https://www.youtube.com/watch?v=4RMzl8k6dXg
