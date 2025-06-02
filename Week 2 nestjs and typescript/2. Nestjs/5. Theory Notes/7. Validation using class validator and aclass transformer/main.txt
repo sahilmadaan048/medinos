@@ -1,0 +1,154 @@
+Great! Let’s now cover how to perform **Validation** using `class-validator` and `class-transformer` in **NestJS** — two powerful libraries that work together with DTOs.
+
+---
+
+## ✅ Overview
+
+* **`class-validator`** provides decorators like `@IsString()`, `@IsInt()` to validate data.
+* **`class-transformer`** transforms plain objects into class instances (needed for validation to work properly).
+
+---
+
+## 🔧 1. Install Required Packages
+
+If not already installed:
+
+```bash
+npm install class-validator class-transformer
+```
+
+---
+
+## 📄 2. Enable Validation Globally (`main.ts`)
+
+This ensures that validation is applied to every request using DTOs.
+
+```ts
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // ✅ Enables global validation for incoming DTOs
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // Converts incoming payloads to DTO instances
+      whitelist: true, // Strips properties that are not in the DTO
+      forbidNonWhitelisted: true, // Throws error on extra properties
+    }),
+  );
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+---
+
+## 📦 3. Create a DTO with Validation
+
+**`create-user.dto.ts`**
+
+```ts
+import { IsString, IsEmail, MinLength, IsInt, Min, Max } from 'class-validator';
+
+export class CreateUserDto {
+  @IsString()
+  @MinLength(2)
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsInt()
+  @Min(18)
+  @Max(100)
+  age: number;
+}
+```
+
+---
+
+## 📥 4. Use DTO in Controller
+
+**`users.controller.ts`**
+
+```ts
+import { Body, Controller, Post } from '@nestjs/common';
+import { CreateUserDto } from './create-user.dto';
+
+@Controller('users')
+export class UsersController {
+  @Post()
+  createUser(@Body() dto: CreateUserDto) {
+    return {
+      message: 'User created successfully!',
+      data: dto,
+    };
+  }
+}
+```
+
+---
+
+## 🧪 5. Example Request
+
+### ✅ Valid Input
+
+```json
+{
+  "name": "Alice",
+  "email": "alice@example.com",
+  "age": 25
+}
+```
+
+### ❌ Invalid Input
+
+```json
+{
+  "name": "A",
+  "email": "wrong-email",
+  "age": 12
+}
+```
+
+### ❗ Response
+
+```json
+{
+  "statusCode": 400,
+  "message": [
+    "name must be longer than or equal to 2 characters",
+    "email must be an email",
+    "age must not be less than 18"
+  ],
+  "error": "Bad Request"
+}
+```
+
+---
+
+## 🛡️ Optional Security Settings
+
+In `ValidationPipe`:
+
+| Option                 | What it Does                              |
+| ---------------------- | ----------------------------------------- |
+| `transform`            | Transforms plain object to class instance |
+| `whitelist`            | Removes unexpected properties             |
+| `forbidNonWhitelisted` | Throws error if unexpected property found |
+
+---
+
+## ✅ Summary
+
+* Use **`class-validator`** decorators in DTOs to apply validation rules.
+* Enable **`ValidationPipe`** globally to apply them app-wide.
+* Use **`class-transformer`** features via `transform: true` to convert payloads into class instances.
+
+---
+
+Would you like an example of **nested validation**, custom error messages, or array validation next?

@@ -1,0 +1,124 @@
+Great question! Understanding **Dependency Injection (DI)** is key to mastering NestJS — it's a core part of how Nest works behind the scenes.
+
+---
+
+# ✅ What is Dependency Injection (DI)?
+
+**Dependency Injection** is a design pattern where **objects are passed their dependencies instead of creating them internally.** This makes code:
+
+* More modular
+* Easier to test
+* Easier to maintain
+
+NestJS has **built-in DI** powered by **TypeScript decorators and metadata**.
+
+---
+
+## 🔧 How Does DI Work in NestJS?
+
+1. You create a **provider** (typically a `@Injectable()` class like a service).
+2. You declare it in the **module**'s `providers` array.
+3. NestJS automatically **resolves and injects** it into classes (like controllers or other services) that depend on it.
+
+---
+
+### 🔁 Example: DI in Action
+
+Let’s walk through a simple example:
+
+### 1. **Create a Service** (`cats.service.ts`)
+
+```ts
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class CatsService {
+  private cats = ['Whiskers', 'Tom', 'Garfield'];
+
+  findAll(): string[] {
+    return this.cats;
+  }
+}
+```
+
+* `@Injectable()` tells NestJS that this class can be injected as a dependency.
+
+---
+
+### 2. **Inject the Service into a Controller** (`cats.controller.ts`)
+
+```ts
+import { Controller, Get } from '@nestjs/common';
+import { CatsService } from './cats.service';
+
+@Controller('cats')
+export class CatsController {
+  constructor(private readonly catsService: CatsService) {} // DI happens here
+
+  @Get()
+  findAll() {
+    return this.catsService.findAll();
+  }
+}
+```
+
+* Nest sees the constructor parameter `catsService` and **automatically injects** the instance for you.
+
+---
+
+### 3. **Register Both in a Module** (`cats.module.ts`)
+
+```ts
+import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
+
+@Module({
+  controllers: [CatsController],
+  providers: [CatsService], // Registering the service
+})
+export class CatsModule {}
+```
+
+---
+
+## 💡 Key Points
+
+| Concept               | Description                                             |
+| --------------------- | ------------------------------------------------------- |
+| `@Injectable()`       | Marks a class as a provider that can be injected        |
+| Constructor Injection | Dependencies are injected via constructor               |
+| `providers` array     | Registers services (or other classes) for DI            |
+| Singleton Scope       | Services are **singleton** by default (shared instance) |
+
+---
+
+## 🧪 Bonus: Custom Provider Injection
+
+You can also use tokens for injection or inject values/configs:
+
+```ts
+{
+  provide: 'API_KEY',
+  useValue: '123456-secret'
+}
+```
+
+And then inject it like:
+
+```ts
+constructor(@Inject('API_KEY') private apiKey: string) {}
+```
+
+---
+
+## ✅ Summary
+
+* NestJS uses **constructor-based dependency injection**.
+* Services (or any `@Injectable()` class) are injected via the constructor.
+* You register them in the `providers` array of a module.
+* It makes your app **modular, testable, and clean**.
+
+---
+
+Want to see how DI works with custom services or testing? Let me know!

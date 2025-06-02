@@ -1,0 +1,124 @@
+Great! Let’s now understand **Routing** and **HTTP Request Methods** in **NestJS** — a fundamental part of building RESTful APIs.
+
+---
+
+# 🛣️ Routing and HTTP Request Methods in NestJS
+
+## 🔹 What is Routing?
+
+Routing in NestJS means mapping **HTTP requests** (like `GET`, `POST`, etc.) to **controller methods**.
+
+You define routing logic using decorators like `@Get()`, `@Post()`, `@Put()`, etc., in a controller class.
+
+---
+
+## 🔹 Common HTTP Methods
+
+| Method   | Use Case                         |
+| -------- | -------------------------------- |
+| `GET`    | Fetch data                       |
+| `POST`   | Create new data                  |
+| `PUT`    | Replace existing data completely |
+| `PATCH`  | Update part of the existing data |
+| `DELETE` | Remove data                      |
+
+---
+
+## 🔧 Example: Full REST Controller
+
+Let’s build a controller for a `cats` resource using all these methods.
+
+```ts
+import { Controller, Get, Post, Put, Patch, Delete, Param, Body } from '@nestjs/common';
+
+@Controller('cats') // All routes will be prefixed with /cats
+export class CatsController {
+  @Get()
+  findAll() {
+    return 'This action returns all cats';
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return `This action returns cat with id ${id}`;
+  }
+
+  @Post()
+  create(@Body() body: any) {
+    return {
+      message: 'New cat created',
+      data: body,
+    };
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() body: any) {
+    return {
+      message: `Cat with id ${id} fully updated`,
+      data: body,
+    };
+  }
+
+  @Patch(':id')
+  partialUpdate(@Param('id') id: string, @Body() body: any) {
+    return {
+      message: `Cat with id ${id} partially updated`,
+      data: body,
+    };
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return `Cat with id ${id} deleted`;
+  }
+}
+```
+
+---
+
+## 🧠 How it Works
+
+| HTTP Method | Route       | Action                  |
+| ----------- | ----------- | ----------------------- |
+| GET         | `/cats`     | Return all cats         |
+| GET         | `/cats/:id` | Return cat by ID        |
+| POST        | `/cats`     | Create a new cat        |
+| PUT         | `/cats/:id` | Full update of a cat    |
+| PATCH       | `/cats/:id` | Partial update of a cat |
+| DELETE      | `/cats/:id` | Delete a cat            |
+
+---
+
+## 🧪 Sample `curl` Requests
+
+```bash
+# GET all
+curl http://localhost:3000/cats
+
+# GET by id
+curl http://localhost:3000/cats/1
+
+# POST (create new)
+curl -X POST http://localhost:3000/cats -H "Content-Type: application/json" -d '{"name": "Tom"}'
+
+# PUT (full update)
+curl -X PUT http://localhost:3000/cats/1 -H "Content-Type: application/json" -d '{"name": "Jerry"}'
+
+# PATCH (partial update)
+curl -X PATCH http://localhost:3000/cats/1 -H "Content-Type: application/json" -d '{"age": 3}'
+
+# DELETE
+curl -X DELETE http://localhost:3000/cats/1
+```
+
+---
+
+## ✅ Summary
+
+* Routing in NestJS is built using decorators like `@Get()`, `@Post()`, etc.
+* Each method maps to a specific HTTP route and action.
+* Nest automatically maps URLs and methods to controller functions.
+
+---
+
+Would you like to implement route validation or request DTOs next?

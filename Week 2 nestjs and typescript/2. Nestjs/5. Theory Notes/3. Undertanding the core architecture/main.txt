@@ -1,0 +1,150 @@
+Sure! Let's break down the **core architecture of NestJS** by explaining the key building blocks: **Modules**, **Controllers**, and **Services** — the backbone of any NestJS application.
+
+---
+
+# Core Architecture of NestJS
+
+NestJS follows a modular architecture pattern. The main pieces are:
+
+### 1. **Modules**
+
+### 2. **Controllers**
+
+### 3. **Services**
+
+---
+
+## 1. Modules
+
+### What is a Module?
+
+* A **module** is a class annotated with `@Module()` decorator.
+* It is the **organizational unit** of your app.
+* It groups related **controllers** and **providers (services)** together.
+* Every NestJS app has at least one root module (`AppModule`).
+
+### Why use Modules?
+
+* Helps in organizing code into reusable, cohesive blocks.
+* Makes it easier to manage and scale the application.
+* Enables dependency injection scope.
+
+---
+
+### Basic Module Example
+
+```typescript
+import { Module } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
+
+@Module({
+  controllers: [CatsController],  // Controllers for handling requests
+  providers: [CatsService],       // Services (providers) for business logic
+})
+export class CatsModule {}
+```
+
+---
+
+## 2. Controllers
+
+### What is a Controller?
+
+* Controllers handle **incoming HTTP requests**.
+* They define **routes** and **request methods** (`GET`, `POST`, `PUT`, etc.).
+* Responsible for receiving client requests and returning responses.
+
+### Controllers should be thin:
+
+* They should delegate business logic to **services**.
+* Only handle request parsing and response formatting.
+
+---
+
+### Basic Controller Example
+
+```typescript
+import { Controller, Get, Post, Body } from '@nestjs/common';
+import { CatsService } from './cats.service';
+
+@Controller('cats')  // Route prefix: /cats
+export class CatsController {
+  constructor(private readonly catsService: CatsService) {}
+
+  @Get()
+  findAll() {
+    return this.catsService.findAll();
+  }
+
+  @Post()
+  create(@Body() catData: { name: string; age: number }) {
+    return this.catsService.create(catData);
+  }
+}
+```
+
+---
+
+## 3. Services
+
+### What is a Service?
+
+* Services contain **business logic**.
+* They are classes annotated with `@Injectable()`.
+* Usually injected into controllers via **dependency injection**.
+* Can also be injected into other services.
+* Services often interact with databases, external APIs, or do computations.
+
+---
+
+### Basic Service Example
+
+```typescript
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class CatsService {
+  private cats = [];
+
+  findAll() {
+    return this.cats;
+  }
+
+  create(cat: { name: string; age: number }) {
+    this.cats.push(cat);
+    return cat;
+  }
+}
+```
+
+---
+
+## How They Work Together
+
+* The **Module** bundles related controllers and services.
+* The **Controller** handles requests and responses.
+* The **Controller** calls **Service** methods to execute business logic.
+* The **Service** manages data and logic, returning results to the controller.
+
+---
+
+### Visual Flow
+
+```
+Client --> Controller --> Service --> Data/Business Logic --> Service --> Controller --> Client
+```
+
+---
+
+## Summary:
+
+| Component      | Responsibility                    | Decorator       |
+| -------------- | --------------------------------- | --------------- |
+| **Module**     | Organize controllers and services | `@Module()`     |
+| **Controller** | Handle HTTP requests and routes   | `@Controller()` |
+| **Service**    | Business logic and data handling  | `@Injectable()` |
+
+---
+
+If you'd like, I can show you how to create all three together with a working example! Would you want that?

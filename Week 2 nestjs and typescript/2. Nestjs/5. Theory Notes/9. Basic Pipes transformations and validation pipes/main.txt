@@ -1,0 +1,124 @@
+## Middleware in NestJS
+
+| Concept        | In a sentence                                                                                                                                         |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Middleware** | A function that runs **before the route handler**, giving you a chance to read/modify the request and response or call the next handler in the chain. |
+
+Typical uses → logging, CORS, authentication token extraction, request shaping, etc.
+
+---
+
+### 1 ️⃣  Anatomy of a NestJS middleware
+
+```ts
+import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+
+@Injectable()
+export class LoggingMiddleware implements NestMiddleware {
+  private readonly logger = new Logger('HTTP');   // optional Nest logger
+
+  use(req: Request, res: Response, next: NextFunction) {
+    const { method, originalUrl } = req;
+    const start = Date.now();
+
+    res.on('finish', () => {          // run *after* response is sent
+      const { statusCode } = res;
+      const elapsed = Date.now() - start;
+      this.logger.log(
+        `${method} ${originalUrl} → ${statusCode} (${elapsed} ms)`,
+      );
+    });
+
+    next();                           // hand off to the next middleware / controller
+  }
+}
+```
+
+Key points
+
+* Implements **`NestMiddleware`** and defines a `use()` method.
+* Call **`next()`** when you’re done (otherwise the request stalls).
+* `res.on('finish')` lets us measure total response time.
+
+---
+
+### 2 ️⃣  Binding the middleware
+
+#### a)  **Per-module / per-route scope**
+
+```ts
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { LoggingMiddleware } from './logging.middleware';
+
+@Module({
+  controllers: [CatsController],
+})
+export class CatsModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggingMiddleware)        // you can apply multiple
+      .forRoutes(CatsController);      // or { path: 'cats', method: RequestMethod.GET }
+  }
+}
+```
+
+*`forRoutes()`* accepts controllers or explicit path/method objects, giving fine-grained control over where the middleware runs.
+
+#### b)  **Global middleware**
+
+If you want the logger on **every** request:
+
+```ts
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.use(new LoggingMiddleware().use);   // or app.use(loggerFn);
+  await app.listen(3000);
+}
+```
+
+*(For global use, you can skip `@Injectable()` since DI isn’t needed; but keeping it injectable lets you inject config/services.)*
+
+---
+
+### 3 ️⃣  Using Nest’s built-in `Logger`
+
+* `new Logger('ContextName')` writes to stdout in dev and can be redirected in prod.
+* Environment variables (`LOG_LEVEL`, `NODE_ENV`) or a custom `LoggerService` let you format or pipe logs elsewhere (pino, Winston, Datadog…).
+
+---
+
+### 4 ️⃣  Testing it quickly
+
+```
+$ curl -i http://localhost:3000/cats
+```
+
+Console output:
+
+```
+[Nest] 22540  - 03/06/2025, 12:34:11 PM     [HTTP] GET /cats → 200 (12 ms)
+```
+
+---
+
+### 5 ️⃣  Tips & variations
+
+| Need                                    | Tweak                                                                                              |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Log request body / headers              | Read `req.body`, `req.headers` **before** calling `next()` (don’t stringify big payloads in prod). |
+| Correlation ID for tracing              | Generate `uuid`, attach to `req`, include it in every log line.                                    |
+| Conditional logging (e.g., skip 2xx)    | Inside `res.on('finish')`, check `statusCode` first.                                               |
+| Async storage (CLS) for per-request ctx | Combine middleware with `AsyncLocalStorage` to store the correlation ID.                           |
+
+---
+
+### TL;DR
+
+1. **Create** a class with `use(req, res, next)` and mark it `@Injectable()`.
+2. **Call `next()`** to keep the request flowing.
+3. **Attach** it globally with `app.use` **or** selectively in a module via `MiddlewareConsumer`.
+4. Use **Nest’s `Logger`** (or any logger you like) for structured, level-based output.
+
+That’s all you need to set up clean, consistent request logging in a NestJS application!
