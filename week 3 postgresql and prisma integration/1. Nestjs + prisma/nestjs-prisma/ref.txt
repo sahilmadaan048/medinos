@@ -1,0 +1,3 @@
+pnpm prisma migarte dev --name init
+pnpm prisma migarte push
+pnpm prisma migarte deploy
