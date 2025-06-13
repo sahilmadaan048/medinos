@@ -1,0 +1,192 @@
+Here's a **detailed guide** to implement **Pagination, Filtering, and Sorting** in **NestJS** using **Prisma**, including query parameters like `?page=`, `?limit=`, `?search=`, and `?sortBy=`.
+
+---
+
+## ✅ 1. Understanding Query Parameters
+
+These are passed in the URL:
+
+```http
+GET /users?page=2&limit=10&search=sahil&sortBy=createdAt:desc
+```
+
+* `page=2`: Get 2nd page
+* `limit=10`: Max 10 items per page
+* `search=sahil`: Search keyword (e.g., by name/email)
+* `sortBy=createdAt:desc`: Sort by `createdAt` descending
+
+---
+
+## 🧱 2. Prisma Setup with Pagination and Filtering
+
+### ✅ Controller: Accept query params
+
+```ts
+// user.controller.ts
+
+@Get()
+async findAll(@Query() query: UserQueryDto) {
+  return this.userService.findAll(query);
+}
+```
+
+---
+
+## 🧾 DTO for Query Parameters
+
+```ts
+// dto/user-query.dto.ts
+
+import { IsOptional, IsString, IsNumberString } from 'class-validator';
+
+export class UserQueryDto {
+  @IsOptional()
+  @IsNumberString()
+  page?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  limit?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @IsOptional()
+  @IsString()
+  sortBy?: string; // e.g., "createdAt:desc"
+}
+```
+
+> ✅ Note: DTO helps validate query parameters using `class-validator`.
+
+---
+
+## ⚙️ 3. Service Logic with Prisma
+
+```ts
+// user.service.ts
+
+async findAll(query: UserQueryDto) {
+  const page = parseInt(query.page) || 1;
+  const limit = parseInt(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const where = query.search
+    ? {
+        OR: [
+          { name: { contains: query.search, mode: 'insensitive' } },
+          { email: { contains: query.search, mode: 'insensitive' } },
+        ],
+      }
+    : {};
+
+  const [field, order] = (query.sortBy ?? 'createdAt:desc').split(':');
+
+  const users = await this.prisma.user.findMany({
+    where,
+    skip,
+    take: limit,
+    orderBy: {
+      [field]: order === 'desc' ? 'desc' : 'asc',
+    },
+  });
+
+  const total = await this.prisma.user.count({ where });
+
+  return {
+    data: users,
+    meta: {
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    },
+  };
+}
+```
+
+---
+
+## 🔁 4. Reusable Utility Functions (Optional Clean Approach)
+
+### 📁 `utils/pagination.ts`
+
+```ts
+export function getPagination(query: any) {
+  const page = parseInt(query.page) || 1;
+  const limit = parseInt(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  return { page, limit, skip };
+}
+
+export function getSorting(sortBy = 'createdAt:desc') {
+  const [field, order] = sortBy.split(':');
+  return { [field]: order === 'desc' ? 'desc' : 'asc' };
+}
+```
+
+### 📁 Use in Service
+
+```ts
+import { getPagination, getSorting } from '../utils/pagination';
+
+async findAll(query: UserQueryDto) {
+  const { page, limit, skip } = getPagination(query);
+  const orderBy = getSorting(query.sortBy);
+
+  const where = query.search
+    ? {
+        OR: [
+          { name: { contains: query.search, mode: 'insensitive' } },
+          { email: { contains: query.search, mode: 'insensitive' } },
+        ],
+      }
+    : {};
+
+  const [users, total] = await this.prisma.$transaction([
+    this.prisma.user.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy,
+    }),
+    this.prisma.user.count({ where }),
+  ]);
+
+  return {
+    data: users,
+    meta: {
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    },
+  };
+}
+```
+
+---
+
+## 🧪 Example Request
+
+```http
+GET /users?page=1&limit=5&search=john&sortBy=createdAt:desc
+```
+
+✅ This will return 5 users matching “john”, sorted by creation date descending.
+
+---
+
+## ✅ Summary
+
+| Feature               | What it does                                                 |
+| --------------------- | ------------------------------------------------------------ |
+| `page` & `limit`      | For pagination                                               |
+| `search`              | Full-text search in name/email/etc.                          |
+| `sortBy`              | Sorting by any field (`field:asc/desc`)                      |
+| Prisma `$transaction` | Improves performance when fetching both data and total count |
+| Utility functions     | Clean up pagination/sorting logic                            |
+
+---
+
+Would you like a working code repo or a Swagger example for testing this API easily?
