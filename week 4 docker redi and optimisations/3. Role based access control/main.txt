@@ -1,0 +1,178 @@
+Here's a **complete guide to implementing Role-Based Access Control (RBAC)** in **NestJS**, covering:
+
+1. ✅ Adding roles to users
+2. ✅ Creating custom `@Roles()` decorator & guard
+3. ✅ Protecting admin-only endpoints
+
+We'll use NestJS built-in **Guards**, **Decorators**, and optionally **Passport JWT** for authentication.
+
+---
+
+## 🧑‍🤝‍🧑 1. Add Roles to Users
+
+Assume your user model in Prisma or TypeORM looks like:
+
+### 🔹 Prisma Example:
+
+```prisma
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  role     Role    @default(USER)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+```
+
+> 🔐 Use enums to restrict role values.
+
+---
+
+## 🧾 2. Create `@Roles()` Decorator
+
+### 📁 `roles.decorator.ts`
+
+```ts
+import { SetMetadata } from '@nestjs/common';
+
+export const ROLES_KEY = 'roles';
+export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
+```
+
+This sets roles metadata on your route handler.
+
+---
+
+## 🛡️ 3. Create `RolesGuard` to Check Role Access
+
+### 📁 `roles.guard.ts`
+
+```ts
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { ROLES_KEY } from './roles.decorator';
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    if (!requiredRoles) return true;
+
+    const { user } = context.switchToHttp().getRequest();
+
+    return requiredRoles.includes(user.role); // assuming `user.role` exists
+  }
+}
+```
+
+---
+
+## 🔐 4. Apply Guard Globally or Locally
+
+### Option A – Globally (in `main.ts`)
+
+```ts
+app.useGlobalGuards(new RolesGuard(new Reflector()));
+```
+
+> Good if you use it across most of your app.
+
+### Option B – Per Controller
+
+```ts
+@UseGuards(RolesGuard)
+@Controller('admin')
+export class AdminController {
+  ...
+}
+```
+
+---
+
+## 🛑 5. Securing Admin-Only Endpoints
+
+### 🔹 Controller Example
+
+```ts
+import { Roles } from './roles.decorator';
+import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from './roles.guard';
+
+@UseGuards(RolesGuard)
+@Controller('admin')
+export class AdminController {
+  
+  @Get('dashboard')
+  @Roles('ADMIN')
+  getDashboard() {
+    return 'Only admin can access this';
+  }
+
+  @Get('users')
+  @Roles('ADMIN')
+  getAllUsers() {
+    return 'Admin can see all users';
+  }
+}
+```
+
+---
+
+## 🔐 6. Authenticated Requests
+
+This works with any auth system (e.g., Passport JWT):
+
+```ts
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles('ADMIN')
+@Get('/secure')
+getSecureStuff() {
+  return 'Only admins see this';
+}
+```
+
+> Make sure your JWT payload includes the `role`.
+
+---
+
+## 📦 JWT Payload Example
+
+### When logging in:
+
+```ts
+const payload = {
+  sub: user.id,
+  email: user.email,
+  role: user.role, // important
+};
+```
+
+---
+
+## ✅ Summary
+
+| Concept      | Purpose                                 |
+| ------------ | --------------------------------------- |
+| `@Roles()`   | Attach required roles to route          |
+| `RolesGuard` | Reads metadata and blocks unauthorized  |
+| `user.role`  | Comes from DB/JWT                       |
+| Prisma enum  | Limits roles to allowed values          |
+| `@UseGuards` | Apply role guard to controller or route |
+
+---
+
+Would you like a sample repo or JWT auth setup along with this RBAC?
