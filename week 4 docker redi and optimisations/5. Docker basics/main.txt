@@ -1,0 +1,95 @@
+go to dockerhub and search for postgresql
+
+docker run postgres:17.5 (downloads and starts it)
+docker ps 
+
+(install docker)
+on older versions, download docker rollbox which is kind of channel between windows kernel and the docker image 
+
+
+docker pull redis 
+docker images
+docker run redis
+docker ps
+docker run -d redis (in detatched mode)
+
+(start and stop using start and end)
+docker start (id)
+docker stop (id)
+
+
+(lists running and stopped containier)
+docker ps -a 
+
+(pulls image and atarts container) => docker pull and docker start in one command is docker run 
+docker run 
+
+(for binding port 6000 of the gost machine to the container running on port 6379)
+docker run -p6000:6379 redis
+
+docker run -p6001:6379 redis:4.0
+
+(for debugging)
+
+docker logs id
+docker logs name-of-container 
+
+(to rename while running)
+docker run -d -p6000:6379 --name redis-older redis:4.0
+
+
+docker logs older-redis 
+
+(here -it mwans interractive terminal)
+to access my veirtaual file system o of the container 
+
+docker exec -it container-id /bin/bash
+docker exec -it container-name /bin/bash
+
+
+docker start is to start a a new container 
+
+docker run is to resatrta an old container
+
+
+docker pull mongo
+docker pull mongo-express
+
+
+docker network ls
+docker network create mongo-network
+
+docker run -p 27017:27017 -d -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=password --name mongodb --net mongo-network mongo 
+
+docker run -d \
+    -p 8081:8081 \
+    -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin \
+    -e ME_CONFIG_MONGODB_ADMINPASSWORD=password \
+    --net mongo-network \
+    --name mongo-express \
+    -e MF_CONFIG_MONGODB_ERVER=mongodb \
+    mongo-express
+
+
+docker compose
+
+(start all the containers in mongo.yaml)
+docker-compose -f mongo.yaml up 
+
+(removes all the containers and the networks)
+docker-compose -f mongo.yaml down 
+
+docker build -t my-app:1.0 .
+
+
+docker run my-app:1.0
+
+docker exec -it (contained ir) /bin/bash
+docker exec -it (contained ir) /bin/sh 
+
+docker rm (container-id)
+
+docker tag .........
+docker push (name of the tagged image)
+
+
