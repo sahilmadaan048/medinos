@@ -1,0 +1,202 @@
+Here’s a **complete guide to integrating Redis in NestJS** using `ioredis`, with real examples for **caching task lists** and implementing **cache invalidation** after create/update/delete. We’ll also show how to **run Redis using Docker**.
+
+---
+
+## 🧠 Redis Basics
+
+* **In-memory store** → Very fast reads/writes
+* Used for:
+
+  * ✅ Caching API responses
+  * ✅ Storing sessions (e.g., login)
+  * ✅ Rate limiting
+  * ✅ Background job queues
+
+---
+
+## 🐳 Run Redis with Docker
+
+### Option A – Single command:
+
+```bash
+docker run --name redis-dev -p 6379:6379 -d redis
+```
+
+### Option B – `docker-compose.yml`
+
+```yaml
+version: '3.8'
+services:
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - '6379:6379'
+```
+
+Start it with:
+
+```bash
+docker-compose up -d
+```
+
+---
+
+## ⚙️ Install `ioredis`
+
+```bash
+npm install ioredis
+npm install --save-dev @types/ioredis
+```
+
+---
+
+## 📦 Setup Redis Client in NestJS
+
+### Step 1: Create a Redis provider
+
+```ts
+// redis.provider.ts
+import Redis from 'ioredis';
+
+export const RedisProvider = {
+  provide: 'REDIS_CLIENT',
+  useFactory: () => {
+    return new Redis({
+      host: 'localhost',
+      port: 6379,
+    });
+  },
+};
+```
+
+---
+
+### Step 2: Register the provider in a module
+
+```ts
+// redis.module.ts
+import { Module } from '@nestjs/common';
+import { RedisProvider } from './redis.provider';
+
+@Module({
+  providers: [RedisProvider],
+  exports: ['REDIS_CLIENT'],
+})
+export class RedisModule {}
+```
+
+---
+
+## 🧑‍💻 Example: Cache Task List API
+
+### Step 3: Inject Redis client in your service
+
+```ts
+// tasks.service.ts
+import { Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
+import Redis from 'ioredis';
+
+@Injectable()
+export class TasksService {
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+  ) {}
+
+  private cacheKey = 'tasks:all';
+
+  async findAll() {
+    // ✅ Check cache first
+    const cached = await this.redis.get(this.cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    // ❌ If not cached, fetch from DB
+    const tasks = await this.prisma.task.findMany();
+
+    // 🧠 Cache it for next time (set TTL = 60 sec)
+    await this.redis.set(this.cacheKey, JSON.stringify(tasks), 'EX', 60);
+
+    return tasks;
+  }
+
+  async create(data: any) {
+    const task = await this.prisma.task.create({ data });
+
+    // 🚫 Invalidate cache
+    await this.redis.del(this.cacheKey);
+
+    return task;
+  }
+
+  async update(id: number, data: any) {
+    const task = await this.prisma.task.update({ where: { id }, data });
+
+    // 🚫 Invalidate cache
+    await this.redis.del(this.cacheKey);
+
+    return task;
+  }
+
+  async delete(id: number) {
+    const task = await this.prisma.task.delete({ where: { id } });
+
+    // 🚫 Invalidate cache
+    await this.redis.del(this.cacheKey);
+
+    return task;
+  }
+}
+```
+
+---
+
+## 🔁 Cache Invalidation
+
+Always delete the related cache key after:
+
+* Creating new data
+* Updating existing data
+* Deleting data
+
+This ensures cache stays **in sync** with DB.
+
+---
+
+## ✅ Summary Table
+
+| Concept                        | Code/Tool Used                |
+| ------------------------------ | ----------------------------- |
+| Connect to Redis               | `ioredis`                     |
+| Run Redis                      | `docker run redis` or Compose |
+| Cache data                     | `redis.set()` with TTL        |
+| Get from cache                 | `redis.get()`                 |
+| Invalidate cache after changes | `redis.del(key)`              |
+
+---
+
+## 📁 Folder Structure Suggestion
+
+```
+src/
+├── redis/
+│   ├── redis.module.ts
+│   └── redis.provider.ts
+├── tasks/
+│   ├── tasks.controller.ts
+│   └── tasks.service.ts
+```
+
+---
+
+## 🧪 Bonus: Redis Dev Tools
+
+* [RedisInsight](https://redis.com/redis-enterprise/redis-insight/) – GUI for Redis
+* CLI: `redis-cli` or use `docker exec -it redis redis-cli`
+
+---
+
+Would you like me to create a working boilerplate GitHub repo for this setup (NestJS + Redis + Prisma + Docker)?
