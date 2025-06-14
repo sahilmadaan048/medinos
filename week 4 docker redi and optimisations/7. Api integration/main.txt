@@ -1,0 +1,267 @@
+Here's a **hands-on practice plan** to help you implement and refine all the key concepts from your NestJS learning — step by step. I'll walk you through **how to refactor, secure, enhance, containerize, and optimize your API** using pagination, roles, interceptors, Docker, and Redis caching.
+
+---
+
+## ✅ 1. Refactor APIs to Support Pagination & Filtering
+
+### 👇 Example: `/tasks?page=1&limit=10&search=urgent`
+
+#### **Controller**
+
+```ts
+@Get()
+getTasks(
+  @Query('page') page = 1,
+  @Query('limit') limit = 10,
+  @Query('search') search?: string
+) {
+  return this.taskService.getTasks(+page, +limit, search);
+}
+```
+
+#### **Service**
+
+```ts
+async getTasks(page: number, limit: number, search?: string) {
+  const where = search
+    ? { title: { contains: search, mode: 'insensitive' } }
+    : {};
+
+  const tasks = await this.prisma.task.findMany({
+    where,
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+
+  const total = await this.prisma.task.count({ where });
+
+  return {
+    data: tasks,
+    total,
+    page,
+    limit,
+  };
+}
+```
+
+---
+
+## 🔐 2. (Optional) Protect Routes with Role Guards & Custom Decorators
+
+### 🧱 Create `@Roles()` Decorator
+
+```ts
+export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
+```
+
+### 🔒 Create `RolesGuard`
+
+```ts
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+    return requiredRoles ? requiredRoles.includes(user.role) : true;
+  }
+}
+```
+
+### ✅ Use it
+
+```ts
+@UseGuards(RolesGuard)
+@Roles('admin')
+@Get('/admin')
+getSecretData() {
+  return 'Admin only data';
+}
+```
+
+---
+
+## ⚠️ 3. Add Global Error Handling Filters and Response Interceptors
+
+### 📦 Exception Filter (`http-exception.filter.ts`)
+
+```ts
+@Catch(HttpException)
+export class GlobalExceptionFilter implements ExceptionFilter {
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const res = ctx.getResponse<Response>();
+    const req = ctx.getRequest<Request>();
+    const status = exception.getStatus();
+    const response = exception.getResponse();
+
+    res.status(status).json({
+      statusCode: status,
+      path: req.url,
+      message: (response as any).message || exception.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+```
+
+### 📦 Interceptor (`transform.interceptor.ts`)
+
+```ts
+@Injectable()
+export class TransformInterceptor<T> implements NestInterceptor<T, any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map(data => ({
+        success: true,
+        data,
+      })),
+    );
+  }
+}
+```
+
+### 🔗 Register in `main.ts`
+
+```ts
+app.useGlobalFilters(new GlobalExceptionFilter());
+app.useGlobalInterceptors(new TransformInterceptor());
+```
+
+---
+
+## 🐳 4. (Optional) Containerize the Application with Docker
+
+### ✅ Dockerfile
+
+```dockerfile
+FROM node:18
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["node", "dist/main"]
+```
+
+### ✅ docker-compose.yml
+
+```yaml
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+```
+
+```bash
+docker-compose up --build
+```
+
+---
+
+## ⚡ 5. Add Redis Cache for GET Endpoints like `/tasks`, `/users`
+
+### 🧱 Install and Setup
+
+```bash
+npm install ioredis
+```
+
+#### `redis.provider.ts`
+
+```ts
+import Redis from 'ioredis';
+
+export const RedisProvider = {
+  provide: 'REDIS_CLIENT',
+  useFactory: () => new Redis({ host: 'localhost', port: 6379 }),
+};
+```
+
+#### `redis.module.ts`
+
+```ts
+@Module({
+  providers: [RedisProvider],
+  exports: ['REDIS_CLIENT'],
+})
+export class RedisModule {}
+```
+
+---
+
+### 🔄 Use Redis in Service (e.g., `task.service.ts`)
+
+```ts
+constructor(
+  private prisma: PrismaService,
+  @Inject('REDIS_CLIENT') private redis: Redis
+) {}
+
+async getTasks(page: number, limit: number, search?: string) {
+  const cacheKey = `tasks:${page}:${limit}:${search || 'all'}`;
+  const cached = await this.redis.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const where = search ? { title: { contains: search } } : {};
+  const tasks = await this.prisma.task.findMany({ where, skip: (page - 1) * limit, take: limit });
+
+  await this.redis.set(cacheKey, JSON.stringify(tasks), 'EX', 60); // TTL 60s
+  return tasks;
+}
+
+async createTask(data: any) {
+  const task = await this.prisma.task.create({ data });
+  await this.redis.flushall(); // Invalidate all caches
+  return task;
+}
+```
+
+---
+
+## ✅ Final Folder Structure (Recommended)
+
+```
+src/
+├── auth/
+│   └── guards/roles.guard.ts
+│   └── decorators/roles.decorator.ts
+├── redis/
+│   └── redis.provider.ts
+│   └── redis.module.ts
+├── common/
+│   └── filters/http-exception.filter.ts
+│   └── interceptors/transform.interceptor.ts
+├── tasks/
+│   └── tasks.controller.ts
+│   └── tasks.service.ts
+├── main.ts
+```
+
+---
+
+## 🧪 Want to Practice?
+
+You can:
+
+* Pick `/tasks` and `/users` endpoints and implement all of the above.
+* Test `/tasks?page=2&limit=5&search=urgent`
+* Test protected `/admin` route with JWT + role
+* Try `docker-compose up` and test in browser/Postman
+* Monitor cache hits by logging in Redis client
+
+---
+
+Would you like me to generate a starter repo with this all scaffolded?
