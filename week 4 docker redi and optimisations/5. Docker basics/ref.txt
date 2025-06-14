@@ -1,0 +1,264 @@
+
+Here's a **detailed breakdown** of both **Error Handling & Interceptors** in NestJS and a quick intro to **Docker Basics**, with examples and best practices 👇
+
+---
+
+## 🛠️ 1. Error Handling in NestJS
+
+### ✅ Use `HttpException` to throw consistent errors
+
+```ts
+import { HttpException, HttpStatus } from '@nestjs/common';
+
+throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+
+// OR with object:
+throw new HttpException(
+  {
+    status: HttpStatus.FORBIDDEN,
+    error: 'You are not allowed to do this.',
+  },
+  HttpStatus.FORBIDDEN,
+);
+```
+
+---
+
+### 🔥 Custom Exception Filter
+
+Used to **format** or **log** errors in a consistent way.
+
+---
+
+### 📁 `http-exception.filter.ts`
+
+```ts
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  Logger,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
+
+@Catch(HttpException)
+export class HttpExceptionFilter implements ExceptionFilter {
+  private logger = new Logger('HttpException');
+
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const res = ctx.getResponse<Response>();
+    const req = ctx.getRequest<Request>();
+
+    const status = exception.getStatus();
+    const response = exception.getResponse();
+
+    const errorResponse = {
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      path: req.url,
+      method: req.method,
+      message: (response as any).message || exception.message,
+    };
+
+    this.logger.error(
+      `${req.method} ${req.url} ${status} - ${errorResponse.message}`,
+    );
+
+    res.status(status).json(errorResponse);
+  }
+}
+```
+
+---
+
+### ✅ Use Globally
+
+In `main.ts`:
+
+```ts
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new HttpExceptionFilter());
+  await app.listen(3000);
+}
+```
+
+---
+
+## 🚦 2. Interceptors in NestJS
+
+Interceptors are used for **cross-cutting concerns** like logging, response transformation, and measuring performance.
+
+---
+
+### 📁 Logging Interceptor
+
+```ts
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+  Logger,
+} from '@nestjs/common';
+import { Observable, tap } from 'rxjs';
+
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+  private logger = new Logger('HTTP');
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const req = context.switchToHttp().getRequest();
+    const { method, url } = req;
+    const now = Date.now();
+
+    return next.handle().pipe(
+      tap(() => {
+        const delay = Date.now() - now;
+        this.logger.log(`${method} ${url} - ${delay}ms`);
+      }),
+    );
+  }
+}
+```
+
+---
+
+### ✅ Apply Globally
+
+In `main.ts`:
+
+```ts
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+
+app.useGlobalInterceptors(new LoggingInterceptor());
+```
+
+---
+
+### 🔄 Response Transformation Interceptor
+
+```ts
+@Injectable()
+export class TransformInterceptor<T> implements NestInterceptor<T, any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map(data => ({
+        success: true,
+        data,
+      })),
+    );
+  }
+}
+```
+
+---
+
+### 🕒 Measuring Execution Time (same as LoggingInterceptor)
+
+Just log the `Date.now()` difference like above.
+
+---
+
+### ✅ Summary of Error Handling + Interceptors
+
+| Feature                | Use Case                         |
+| ---------------------- | -------------------------------- |
+| `HttpException`        | Throw API-safe errors            |
+| Custom ExceptionFilter | Format/log errors consistently   |
+| Global Filters         | Avoid boilerplate try-catch      |
+| Interceptors           | Logging, transform, timing, etc. |
+
+---
+
+## 🐳 5. Docker Basics (for NestJS)
+
+### 💡 Why Docker?
+
+* Run apps in **isolated containers**
+* Same config on all environments: dev, test, prod
+* Easy to ship and scale
+
+---
+
+### 🧱 Dockerfile for NestJS App
+
+```Dockerfile
+# base image
+FROM node:18
+
+# app directory
+WORKDIR /app
+
+# install deps
+COPY package*.json ./
+RUN npm install
+
+# copy source
+COPY . .
+
+# build app
+RUN npm run build
+
+# expose port
+EXPOSE 3000
+
+# start app
+CMD ["node", "dist/main"]
+```
+
+---
+
+### 📦 Docker Commands
+
+| Command                         | Purpose                    |
+| ------------------------------- | -------------------------- |
+| `docker build -t myapp .`       | Builds image               |
+| `docker run -p 3000:3000 myapp` | Runs app at localhost:3000 |
+| `docker images`                 | Lists images               |
+| `docker ps`                     | Lists running containers   |
+
+---
+
+### 🔧 docker-compose.yml
+
+```yaml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/app
+```
+
+---
+
+### ✅ Summary of Docker
+
+| Concept          | What it Does                    |
+| ---------------- | ------------------------------- |
+| `Dockerfile`     | Blueprint for your app image    |
+| `docker build`   | Create image from Dockerfile    |
+| `docker run`     | Run app in container            |
+| `docker-compose` | Run multi-container apps easily |
+
+---
+
+### 📚 Resources
+
+* 📘 [NestJS Exception Filters](https://docs.nestjs.com/exception-filters)
+* 📘 [NestJS Interceptors](https://docs.nestjs.com/interceptors)
+* 🎥 [YouTube: NestJS Error Handling](https://www.youtube.com/results?search_query=nestjs+error+handling)
+* 🐳 [Docker Official Docs](https://docs.docker.com/get-started/)
+
+---
+
+Would you like a complete example app with all of these implemented and dockerized?
