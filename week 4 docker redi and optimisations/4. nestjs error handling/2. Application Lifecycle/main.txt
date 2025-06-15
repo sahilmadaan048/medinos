@@ -1,0 +1,42 @@
+for usinfg OnModuleInit => 
+        first implement a interface named OnModuleInit
+        and then call the function with the name OnModuleInit inside intercept
+
+ //
+
+export class JobModule implements OnModuleInit {
+    async onModuleInit() {
+        console.log("jobs module init); // here o i snot capital in the function name while it is capital in the interface name
+    }
+}
+
+ //
+
+ //
+
+export class MeetingModule implements OnModuleInit {
+    async onModuleInit() {
+        console.log("meetings module init); // here o i snot capital in the function name while it is capital in the interface name
+    }
+}
+
+ //
+
+ // we can make these function asynchronous also using async keyword  
+
+
+ /*
+
+ in the terminting phase, we will see how OnModuleDestry is used  
+ this closes the connection started by OnModuleInit
+
+ */
+
+
+ Application related events from @nestjs/common
+
+    initialising phase
+        - OnApplicationBootttrap
+    terminating phase
+        - onApplicationShutdown
+        - BeforeApplicationShutdown
